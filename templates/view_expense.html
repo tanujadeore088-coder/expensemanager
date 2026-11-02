@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}All Expenses - Expense Manager Tracker{% endblock %}
+{% block header_title %}Expense Management{% endblock %}
+
+{% block content %}
+<!-- Search & Filter Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{{ url_for('view_expenses') }}" class="row g-3 align-items-end">
+            <!-- Search Keyword -->
+            <div class="col-12 col-md-4 col-xl-3">
+                <label for="search" class="form-label fw-semibold small text-muted">Search Title / Notes</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-start-0" id="search" name="search" 
+                           placeholder="Type to search..." value="{{ search_query }}">
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="col-12 col-md-4 col-xl-2">
+                <label for="category_id" class="form-label fw-semibold small text-muted">Category</label>
+                <select class="form-select" id="category_id" name="category_id">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.category_id }}" {% if selected_category == (cat.category_id|string) %}selected{% endif %}>
+                        {{ cat.category_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Start Date -->
+            <div class="col-6 col-md-2 col-xl-2">
+                <label for="start_date" class="form-label fw-semibold small text-muted">From Date</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+
+            <!-- End Date -->
+            <div class="col-6 col-md-2 col-xl-2">
+                <label for="end_date" class="form-label fw-semibold small text-muted">To Date</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+
+            <!-- Sort By -->
+            <div class="col-12 col-md-4 col-xl-2">
+                <label for="sort_by" class="form-label fw-semibold small text-muted">Sort By</label>
+                <select class="form-select" id="sort_by" name="sort_by">
+                    <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date (Newest first)</option>
+                    <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date (Oldest first)</option>
+                    <option value="amount_desc" {% if sort_by == 'amount_desc' %}selected{% endif %}>Amount (Highest first)</option>
+                    <option value="amount_asc" {% if sort_by == 'amount_asc' %}selected{% endif %}>Amount (Lowest first)</option>
+                </select>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="col-12 col-md-4 col-xl-1 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100" title="Apply Filter">
+                    <i class="bi bi-funnel-fill"></i>
+                </button>
+                <a href="{{ url_for('view_expenses') }}" class="btn btn-outline-secondary" title="Reset Filters">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Filter Summary Bar -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 px-1">
+    <div>
+        <span class="text-muted">Showing </span>
+        <strong class="text-dark">{{ count }}</strong> 
+        <span class="text-muted">expense record{% if count != 1 %}s{% endif %}</span>
+    </div>
+    <div class="bg-white border rounded-pill px-3 py-1 shadow-sm small">
+        <span class="text-muted me-1">Filtered Total:</span>
+        <strong class="text-danger fs-6">₹{{ "%.2f"|format(filtered_total) }}</strong>
+    </div>
+</div>
+
+<!-- Expense List Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Date</th>
+                        <th>Title & Description</th>
+                        <th>Category</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-center pe-4" style="width: 140px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if expenses %}
+                        {% for exp in expenses %}
+                        <tr>
+                            <td class="ps-4 text-nowrap">
+                                <div class="fw-semibold text-dark">{{ exp.date }}</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ exp.title }}</div>
+                                {% if exp.description %}
+                                <div class="text-muted small text-truncate" style="max-width: 320px;">
+                                    {{ exp.description }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge category-badge category-{{ exp.category_name|lower|replace(' ', '-') }}">
+                                    {{ exp.category_name }}
+                                </span>
+                            </td>
+                            <td class="text-end fw-bold text-danger text-nowrap fs-6">
+                                -₹{{ "%.2f"|format(exp.amount) }}
+                            </td>
+                            <td class="text-center pe-4 text-nowrap">
+                                <a href="{{ url_for('edit_expense', expense_id=exp.expense_id) }}" 
+                                   class="btn btn-sm btn-outline-primary rounded-3 me-1" title="Edit Expense">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-danger rounded-3" 
+                                        title="Delete Expense"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteModal{{ exp.expense_id }}">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+
+                                <!-- Delete Confirmation Modal -->
+                                <div class="modal fade" id="deleteModal{{ exp.expense_id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ exp.expense_id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 rounded-4 shadow">
+                                            <div class="modal-header border-0 pb-0">
+                                                <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel{{ exp.expense_id }}">
+                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Delete
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-start py-3">
+                                                <p class="mb-1 text-dark">Are you sure you want to delete this expense record?</p>
+                                                <div class="p-3 bg-light rounded-3 mt-2 border">
+                                                    <strong>{{ exp.title }}</strong> &bull; <span class="text-danger fw-bold">₹{{ "%.2f"|format(exp.amount) }}</span>
+                                                    <div class="small text-muted">{{ exp.date }} &bull; {{ exp.category_name }}</div>
+                                                </div>
+                                                <small class="text-muted mt-2 d-block">This action cannot be undone.</small>
+                                            </div>
+                                            <div class="modal-footer border-0 pt-0">
+                                                <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Cancel</button>
+                                                <form action="{{ url_for('delete_expense', expense_id=exp.expense_id) }}" method="POST">
+                                                    <button type="submit" class="btn btn-danger rounded-3 px-3">
+                                                        <i class="bi bi-trash3 me-1"></i>Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-search fs-1 d-block mb-2 text-secondary"></i>
+                                    <h5>No expenses found</h5>
+                                    <p class="small mb-3">No expenses matched your filter or search criteria.</p>
+                                    <a href="{{ url_for('add_expense') }}" class="btn btn-primary rounded-pill px-4">
+                                        <i class="bi bi-plus-lg me-1"></i>Add New Expense
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

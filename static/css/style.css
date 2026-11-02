@@ -1,0 +1,206 @@
+/* ==========================================================================
+   Expense Manager Tracker with Graphs - Custom Stylesheet
+   Modern, Clean, Responsive Design
+   ========================================================================== */
+
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --sidebar-width: 260px;
+    --bg-light: #f8fafc;
+    --card-border-radius: 1rem;
+    --transition-speed: 0.25s;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Sidebar & Layout Navigation
+   ========================================================================== */
+#wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+#sidebar-wrapper {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    transition: margin var(--transition-speed) ease-in-out;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+#sidebar-wrapper .list-group-item {
+    border: none;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: #f1f5f9;
+    color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+#sidebar-wrapper .list-group-item.active i {
+    color: #ffffff !important;
+}
+
+#page-content-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: var(--bg-light);
+}
+
+/* Mobile Sidebar Toggling */
+@media (max-width: 991.98px) {
+    #sidebar-wrapper {
+        margin-left: calc(-1 * var(--sidebar-width));
+        position: fixed;
+        height: 100vh;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* ==========================================================================
+   Card & Metric Components
+   ========================================================================== */
+.card {
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+}
+
+.stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+}
+
+/* ==========================================================================
+   Category Badges
+   ========================================================================== */
+.category-badge {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 2rem;
+    letter-spacing: 0.3px;
+    display: inline-block;
+}
+
+.category-food {
+    background-color: #ffedd5;
+    color: #c2410c;
+}
+
+.category-travel {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.category-shopping {
+    background-color: #fce7f3;
+    color: #be185d;
+}
+
+.category-education {
+    background-color: #ede9fe;
+    color: #6d28d9;
+}
+
+.category-bills {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.category-entertainment {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+/* Fallback badge styling */
+.category-badge:not(.category-food):not(.category-travel):not(.category-shopping):not(.category-education):not(.category-bills):not(.category-entertainment) {
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+}
+
+/* ==========================================================================
+   Tables & Data Presentation
+   ========================================================================== */
+.table th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-top: none;
+}
+
+.table td {
+    padding-top: 0.95rem;
+    padding-bottom: 0.95rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* ==========================================================================
+   Form Controls
+   ========================================================================== */
+.form-control, .form-select {
+    padding: 0.65rem 0.95rem;
+    border-radius: 0.65rem;
+    border: 1px solid #cbd5e1;
+    font-size: 0.95rem;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.btn {
+    font-weight: 500;
+    transition: all var(--transition-speed) ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}

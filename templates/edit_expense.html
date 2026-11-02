@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Expense - Expense Manager Tracker{% endblock %}
+{% block header_title %}Edit Expense Record{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning-subtle text-warning rounded-3 p-2 me-3">
+                        <i class="bi bi-pencil-square fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">Edit Expense</h5>
+                        <p class="text-muted small mb-0">Update the details of transaction #{{ expense.expense_id }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form action="{{ url_for('edit_expense', expense_id=expense.expense_id) }}" method="POST" novalidate id="editExpenseForm">
+                    <!-- Expense Title -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold">Expense Title <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-tag"></i></span>
+                            <input type="text" class="form-control border-start-0" id="title" name="title" 
+                                   value="{{ expense.title }}" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <!-- Amount -->
+                        <div class="col-12 col-md-6">
+                            <label for="amount" class="form-label fw-semibold">Amount (₹) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 fw-bold">₹</span>
+                                <input type="number" step="0.01" min="0.01" class="form-control border-start-0" 
+                                       id="amount" name="amount" value="{{ expense.amount }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="col-12 col-md-6">
+                            <label for="category_id" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-folder2-open"></i></span>
+                                <select class="form-select border-start-0" id="category_id" name="category_id" required>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.category_id }}" {% if cat.category_id == expense.category_id %}selected{% endif %}>
+                                        {{ cat.category_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="mb-3">
+                        <label for="date" class="form-label fw-semibold">Expense Date <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar3"></i></span>
+                            <input type="date" class="form-control border-start-0" id="date" name="date" 
+                                   value="{{ expense.date }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Description / Notes -->
+                    <div class="mb-4">
+                        <label for="description" class="form-label fw-semibold">Description / Notes <small class="text-muted fw-normal">(Optional)</small></label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ expense.description or '' }}</textarea>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <a href="{{ url_for('view_expenses') }}" class="btn btn-outline-secondary px-4 py-2 rounded-3">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-check-lg"></i>
+                            Update Expense
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

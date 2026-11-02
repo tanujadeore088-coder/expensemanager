@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Expense Manager Tracker{% endblock %}
+{% block header_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<!-- Welcome & Quick Stats Cards -->
+<div class="row g-3 mb-4">
+    <!-- Card 1: Total Expenses -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 d-flex align-items-center">
+                <div class="stat-icon bg-primary-subtle text-primary rounded-4 p-3 me-3">
+                    <i class="bi bi-wallet2 fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">Total Expenses</span>
+                    <h3 class="fw-bold mb-0 text-dark">₹{{ "%.2f"|format(total_expenses) }}</h3>
+                    <small class="text-muted">Lifetime spending</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Current Month Expenses -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 d-flex align-items-center">
+                <div class="stat-icon bg-success-subtle text-success rounded-4 p-3 me-3">
+                    <i class="bi bi-calendar-check fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">This Month</span>
+                    <h3 class="fw-bold mb-0 text-dark">₹{{ "%.2f"|format(current_month_expenses) }}</h3>
+                    <small class="text-success fw-medium">{{ current_month_name }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Total Transactions -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 d-flex align-items-center">
+                <div class="stat-icon bg-warning-subtle text-warning rounded-4 p-3 me-3">
+                    <i class="bi bi-receipt fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">Transactions</span>
+                    <h3 class="fw-bold mb-0 text-dark">{{ total_transactions }}</h3>
+                    <small class="text-muted">Recorded entries</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Top Category -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 d-flex align-items-center">
+                <div class="stat-icon bg-info-subtle text-info rounded-4 p-3 me-3">
+                    <i class="bi bi-pie-chart fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted text-uppercase fw-semibold small">Top Category</span>
+                    <h3 class="fw-bold mb-0 text-dark">{{ top_category }}</h3>
+                    <small class="text-muted">Highest expenditure</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graphs & Visual Analytics Row -->
+<div class="row g-4 mb-4">
+    <!-- Category-wise Expense Pie/Doughnut Chart -->
+    <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">Category Breakdown</h5>
+                    <p class="text-muted small mb-0">Distribution of expenses by category</p>
+                </div>
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                    <i class="bi bi-pie-chart-fill me-1"></i> Interactive
+                </span>
+            </div>
+            <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center">
+                <div style="position: relative; width: 100%; max-height: 320px; display: flex; justify-content: center;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div id="categoryChartEmpty" class="text-center text-muted py-5 d-none">
+                    <i class="bi bi-clipboard2-x fs-1 d-block mb-2 text-secondary"></i>
+                    No expense data available yet.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Expense Bar Chart -->
+    <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">Monthly Spending Trends</h5>
+                    <p class="text-muted small mb-0">Monthly comparison over time</p>
+                </div>
+                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                    <i class="bi bi-bar-chart-line-fill me-1"></i> Trends
+                </span>
+            </div>
+            <div class="card-body p-4">
+                <div style="position: relative; width: 100%; height: 320px;">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+                <div id="monthlyChartEmpty" class="text-center text-muted py-5 d-none">
+                    <i class="bi bi-bar-chart fs-1 d-block mb-2 text-secondary"></i>
+                    No monthly data recorded yet.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions & Category Summary Tables -->
+<div class="row g-4">
+    <!-- Recent Transactions -->
+    <div class="col-12 col-xl-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">Recent Transactions</h5>
+                    <p class="text-muted small mb-0">Latest expense items added</p>
+                </div>
+                <a href="{{ url_for('view_expenses') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Title</th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th class="text-end pe-4">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_expenses %}
+                                {% for exp in recent_expenses %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-semibold text-dark">{{ exp.title }}</div>
+                                        {% if exp.description %}
+                                        <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">{{ exp.description }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge category-badge category-{{ exp.category_name|lower|replace(' ', '-') }}">
+                                            {{ exp.category_name }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted small">
+                                        <i class="bi bi-calendar3 me-1"></i>{{ exp.date }}
+                                    </td>
+                                    <td class="text-end pe-4 fw-bold text-danger">
+                                        -₹{{ "%.2f"|format(exp.amount) }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox fs-2 d-block mb-1"></i>
+                                        No expenses recorded yet. <a href="{{ url_for('add_expense') }}">Add your first expense</a>.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Summary Breakdown -->
+    <div class="col-12 col-xl-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">Category Breakdown</h5>
+                    <p class="text-muted small mb-0">Totals by category</p>
+                </div>
+                <a href="{{ url_for('manage_categories') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    Manage
+                </a>
+            </div>
+            <div class="card-body p-4">
+                {% if category_summary %}
+                    <ul class="list-group list-group-flush">
+                        {% for cat in category_summary %}
+                        <li class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-semibold text-dark">{{ cat.category_name }}</h6>
+                                <small class="text-muted">{{ cat.txn_count }} transaction{% if cat.txn_count != 1 %}s{% endif %}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold text-dark">₹{{ "%.2f"|format(cat.total_spent) }}</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted text-center py-4">No categories configured.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}
